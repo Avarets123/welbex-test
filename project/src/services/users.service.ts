@@ -4,38 +4,54 @@ import { compare, hash } from "bcrypt";
 import { UserNotFoundException } from "../exceptions/userNotFound.exception";
 import { InvalidPasswordException } from "../exceptions/invalidPassword.exception";
 import { UserExistsException } from "../exceptions/userExists.exception";
+import { ReqWithUser } from "src/types/reqWithUser.type";
+import { Response } from "express";
+import { JwtService } from "./jwt.service";
 
 export class UsersService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly jwtService: JwtService
+  ) {}
 
-  async register(data: UserDto) {
-    const { password, email } = data;
+  async register({ body }: ReqWithUser, res: Response) {
+    const { password, email, name } = body;
 
-    // const hasUser = await this.findUserByEmail(email).then(() => {
-    //   throw new Error("Пользователь уже зарегистрирован");
-    // });
+    const hasUser = await this.findUserByEmail(email);
 
-    data.password = await this.hashingPassword(password);
+    if (hasUser) {
+      throw UserExistsException;
+    }
 
-    return this.prisma.users.create({
+    const hashPassword = await this.hashingPassword(password);
+
+    const data = { password: hashPassword, email, name };
+
+    const newData = await this.prisma.users.create({
       data,
     });
+
+    res.status(201).json(newData);
   }
 
-  async login(data: Omit<UserDto, "name">) {
-    const { email, password } = data;
+  async login({ body }: ReqWithUser, res: Response) {
+    const { email, password }: Omit<UserDto, "name"> = body;
 
-    const hasUser = await this.findUserByEmail(email).catch(() => {
-      throw new UserNotFoundException();
-    });
+    const hasUser = await this.findUserByEmail(email);
+
+    if (!hasUser) {
+      throw UserNotFoundException;
+    }
 
     const isValidPassword = await compare(password, hasUser.password);
 
     if (!isValidPassword) {
-      throw new InvalidPasswordException();
+      throw InvalidPasswordException;
     }
 
-    return hasUser.id;
+    const tokens = this.jwtService.generateTokens(hasUser.id);
+
+    res.status(200).json(tokens);
   }
 
   async findUserByEmail(email: string) {

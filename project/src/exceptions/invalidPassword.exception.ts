@@ -1,5 +1,5 @@
-export class InvalidPasswordException {
-  message: "Неверный пароль!";
-  code: "BAD_REQUEST";
-  status: 400;
-}
+export const InvalidPasswordException = {
+  message: "Неверный пароль!",
+  code: "BAD_REQUEST",
+  status: 400,
+};

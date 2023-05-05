@@ -1,6 +1,6 @@
 import { sign, verify } from "jsonwebtoken";
 
-class JwtService {
+export class JwtService {
   private readonly accessSecret = process.env.JWT_ACCESS_SECRET ?? "anything";
   private readonly refreshSecret = process.env.JWT_REFRESH_SECRET ?? "anything";
 

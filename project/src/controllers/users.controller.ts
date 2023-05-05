@@ -1,6 +1,6 @@
-import { Request, Response, Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { IController } from "src/interfaces/controller.interface";
-import { refreshingTokens } from "../middlewares/auth.middlewares";
+import { refreshingTokens } from "../middlewares/refreshTokens.middleware";
 import { jwtService } from "../services/jwt.service";
 import { UsersService } from "../services/users.service";
 
@@ -12,12 +12,11 @@ export class UsersController implements IController {
   private async register() {
     this.router.post(
       "/auth/register",
-      async ({ body }: Request, res: Response) => {
+      async (req: Request, res: Response, next: NextFunction) => {
         try {
-          const resData = await this.usersService.register(body);
-          return res.json(resData);
+          await this.usersService.register(req, res);
         } catch (error) {
-          return res.json(error);
+          next(error);
         }
       }
     );
@@ -26,10 +25,12 @@ export class UsersController implements IController {
   private async login() {
     this.router.post(
       "/auth/login",
-      async ({ body }: Request, res: Response) => {
-        const userId = await this.usersService.login(body);
-
-        return res.json(jwtService.generateTokens(userId));
+      async (req: Request, res: Response, next: NextFunction) => {
+        try {
+          await this.usersService.login(req, res);
+        } catch (error) {
+          next(error);
+        }
       }
     );
   }

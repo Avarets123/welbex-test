@@ -1,7 +1,8 @@
 import { Response, Router } from "express";
 import { IController } from "../interfaces/controller.interface";
 import { PostService } from "../services/posts.service";
-import { authMidd, checkUserMidd } from "../middlewares/auth.middlewares";
+import { auth } from "../middlewares/auth.middleware";
+import { checkUser } from "../middlewares/checkUser.middleware";
 import { ReqWithUser } from "src/types/reqWithUser.type";
 
 export class PostsController implements IController {
@@ -12,8 +13,8 @@ export class PostsController implements IController {
   async create() {
     this.router.post(
       "/posts",
-      authMidd,
-      checkUserMidd,
+      auth,
+      checkUser,
       async (req: ReqWithUser, res: Response) => {
         try {
           await this.postsService.create(req, res);
@@ -27,8 +28,8 @@ export class PostsController implements IController {
   update() {
     this.router.patch(
       "/posts/:postId",
-      authMidd,
-      checkUserMidd,
+      auth,
+      checkUser,
       async (req: ReqWithUser, res: Response) => {
         try {
           await this.postsService.update(req, res);
@@ -42,8 +43,8 @@ export class PostsController implements IController {
   async delete() {
     this.router.delete(
       "/posts/:postId",
-      authMidd,
-      checkUserMidd,
+      auth,
+      checkUser,
       async (req: ReqWithUser, res: Response) => {
         try {
           await this.postsService.delete(req, res);
@@ -55,17 +56,13 @@ export class PostsController implements IController {
   }
 
   findMany() {
-    this.router.get(
-      "/posts",
-      authMidd,
-      async (req: ReqWithUser, res: Response) => {
-        try {
-          await this.postsService.findMany(req, res);
-        } catch (e) {
-          console.log(e);
-        }
+    this.router.get("/posts", auth, async (req: ReqWithUser, res: Response) => {
+      try {
+        await this.postsService.findMany(req, res);
+      } catch (e) {
+        console.log(e);
       }
-    );
+    });
   }
 
   getRouter(): Router {
