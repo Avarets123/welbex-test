@@ -1,14 +1,19 @@
 import { PrismaClient } from "@prisma/client";
-import { UserDto } from "src/dto/users/user.dto";
+import { UserDto } from "../dto/users/user.dto";
 import { compare, hash } from "bcrypt";
-import { UserNotFoundException } from "src/exceptions/userNotFound.exception";
-import { InvalidPasswordException } from "src/exceptions/invalidPassword.exception";
+import { UserNotFoundException } from "../exceptions/userNotFound.exception";
+import { InvalidPasswordException } from "../exceptions/invalidPassword.exception";
+import { UserExistsException } from "../exceptions/userExists.exception";
 
 export class UsersService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async register(data: UserDto) {
-    const { password } = data;
+    const { password, email } = data;
+
+    // const hasUser = await this.findUserByEmail(email).then(() => {
+    //   throw new Error("Пользователь уже зарегистрирован");
+    // });
 
     data.password = await this.hashingPassword(password);
 
@@ -20,7 +25,9 @@ export class UsersService {
   async login(data: Omit<UserDto, "name">) {
     const { email, password } = data;
 
-    const hasUser = await this.findUserByEmail(email);
+    const hasUser = await this.findUserByEmail(email).catch(() => {
+      throw new UserNotFoundException();
+    });
 
     const isValidPassword = await compare(password, hasUser.password);
 
@@ -28,17 +35,19 @@ export class UsersService {
       throw new InvalidPasswordException();
     }
 
-    return hasUser;
+    return hasUser.id;
   }
 
   async findUserByEmail(email: string) {
-    return this.prisma.users
-      .findFirstOrThrow({
-        where: { email },
-      })
-      .catch(() => {
-        throw new UserNotFoundException();
-      });
+    return this.prisma.users.findFirst({
+      where: { email },
+    });
+  }
+
+  async findUserById(id: string) {
+    return this.prisma.users.findFirst({
+      where: { id },
+    });
   }
 
   private async hashingPassword(password: string, difficult = 9) {
