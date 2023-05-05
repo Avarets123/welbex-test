@@ -8,6 +8,7 @@ import { PostsController } from "./src/controllers/posts.controller";
 import { errorHandling } from "./src/middlewares/error.middleware";
 import { PrismaClient } from "@prisma/client";
 import { jwtService } from "./src/services/jwt.service";
+
 const app = new App(express());
 
 const prisma = new PrismaClient();

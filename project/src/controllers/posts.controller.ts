@@ -1,4 +1,4 @@
-import { Response, Router } from "express";
+import { NextFunction, Response, Router } from "express";
 import { IController } from "../interfaces/controller.interface";
 import { PostService } from "../services/posts.service";
 import { auth } from "../middlewares/auth.middleware";
@@ -15,11 +15,11 @@ export class PostsController implements IController {
       "/posts",
       auth,
       checkUser,
-      async (req: ReqWithUser, res: Response) => {
+      async (req: ReqWithUser, res: Response, next: NextFunction) => {
         try {
           await this.postsService.create(req, res);
         } catch (e) {
-          console.log(e);
+          next(e);
         }
       }
     );
@@ -30,11 +30,11 @@ export class PostsController implements IController {
       "/posts/:postId",
       auth,
       checkUser,
-      async (req: ReqWithUser, res: Response) => {
+      async (req: ReqWithUser, res: Response, next: NextFunction) => {
         try {
           await this.postsService.update(req, res);
         } catch (e) {
-          console.log(e);
+          next(e);
         }
       }
     );
@@ -45,24 +45,28 @@ export class PostsController implements IController {
       "/posts/:postId",
       auth,
       checkUser,
-      async (req: ReqWithUser, res: Response) => {
+      async (req: ReqWithUser, res: Response, next: NextFunction) => {
         try {
           await this.postsService.delete(req, res);
         } catch (e) {
-          console.log(e);
+          next(e);
         }
       }
     );
   }
 
   findMany() {
-    this.router.get("/posts", auth, async (req: ReqWithUser, res: Response) => {
-      try {
-        await this.postsService.findMany(req, res);
-      } catch (e) {
-        console.log(e);
+    this.router.get(
+      "/posts",
+      auth,
+      async (req: ReqWithUser, res: Response, next: NextFunction) => {
+        try {
+          await this.postsService.findMany(req, res);
+        } catch (e) {
+          next(e);
+        }
       }
-    });
+    );
   }
 
   getRouter(): Router {

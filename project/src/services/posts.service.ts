@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { PostDto } from "../dto/posts/post.dto";
 import { Request, Response } from "express";
 import { ReqWithUser } from "../types/reqWithUser.type";
+import { YourPostNotFound } from "../exceptions/postNotFound.exception";
 
 export class PostService {
   constructor(private readonly prisma: PrismaClient) {}
@@ -71,7 +72,7 @@ export class PostService {
         },
       })
       .catch(() => {
-        throw new Error("Your are not author the post");
+        throw YourPostNotFound;
       });
   }
 }
