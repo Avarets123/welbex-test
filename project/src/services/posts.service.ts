@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { Posts, PrismaClient } from "@prisma/client";
 import { PostDto } from "../dto/posts/post.dto";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { ReqWithUser } from "../types/reqWithUser.type";
 import { YourPostNotFound } from "../exceptions/postNotFound.exception";
 
@@ -41,26 +41,36 @@ export class PostService {
     res.status(204).json("Post has been deleted");
   }
 
-  async findMany({ user, query }: ReqWithUser, res: Response) {
+  async findAuthUserPosts({ user, query }: ReqWithUser, res: Response) {
     const page: any = query.page ?? 1;
 
+    const resData = await this.findPostsByWhere({ authorId: user.sub }, page);
+
+    res.status(200).json(resData);
+  }
+
+  async findAllPosts({ query }: ReqWithUser, res: Response) {
+    const page: any = query.page ?? 1;
+
+    const resData = await this.findPostsByWhere({}, page);
+
+    res.status(200).json(resData);
+  }
+
+  private async findPostsByWhere(where: Partial<Posts>, page: number) {
     const posts = this.prisma.posts.findMany({
-      where: {
-        authorId: user.sub,
-      },
+      where,
       take: page * 20,
       skip: (page <= 1 ? 0 : page - 1) * 20,
     });
 
     const countPosts = this.prisma.posts.count({
-      where: { authorId: user.sub },
+      where,
     });
 
     const [data, count] = await Promise.all([posts, countPosts]);
 
-    const resData = { limit: 20, page, count, data };
-
-    res.status(200).json(resData);
+    return { limit: 20, page, count, data };
   }
 
   private async findPostByAuthorId(postId: string, authorId: string) {

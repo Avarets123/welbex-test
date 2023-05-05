@@ -10,7 +10,7 @@ export class PostsController implements IController {
 
   constructor(private readonly postsService: PostService) {}
 
-  async create() {
+  create() {
     this.router.post(
       "/posts",
       auth,
@@ -40,7 +40,7 @@ export class PostsController implements IController {
     );
   }
 
-  async delete() {
+  delete() {
     this.router.delete(
       "/posts/:postId",
       auth,
@@ -55,13 +55,26 @@ export class PostsController implements IController {
     );
   }
 
-  findMany() {
+  findAuthUserPosts() {
     this.router.get(
       "/posts",
       auth,
       async (req: ReqWithUser, res: Response, next: NextFunction) => {
         try {
-          await this.postsService.findMany(req, res);
+          await this.postsService.findAuthUserPosts(req, res);
+        } catch (e) {
+          next(e);
+        }
+      }
+    );
+  }
+
+  findAllPosts() {
+    this.router.get(
+      "/posts/all",
+      async (req: ReqWithUser, res: Response, next: NextFunction) => {
+        try {
+          await this.postsService.findAllPosts(req, res);
         } catch (e) {
           next(e);
         }
@@ -73,7 +86,8 @@ export class PostsController implements IController {
     this.create();
     this.update();
     this.delete();
-    this.findMany();
+    this.findAuthUserPosts();
+    this.findAllPosts();
 
     return this.router;
   }
