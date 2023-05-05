@@ -4,6 +4,7 @@ import { PostService } from "../services/posts.service";
 import { auth } from "../middlewares/auth.middleware";
 import { checkUser } from "../middlewares/checkUser.middleware";
 import { ReqWithUser } from "src/types/reqWithUser.type";
+import { upload } from "../middlewares/upload.middleware";
 
 export class PostsController implements IController {
   router: Router = Router();
@@ -15,6 +16,7 @@ export class PostsController implements IController {
       "/posts",
       auth,
       checkUser,
+      upload.single("file"),
       async (req: ReqWithUser, res: Response, next: NextFunction) => {
         try {
           await this.postsService.create(req, res);

@@ -1,3 +1,4 @@
+import { NextFunction } from "express";
 import { sign, verify } from "jsonwebtoken";
 
 export class JwtService {
@@ -20,19 +21,11 @@ export class JwtService {
   }
 
   verifyAccessToken(token: string) {
-    try {
-      return verify(token, this.accessSecret);
-    } catch (e) {
-      console.log(e);
-    }
+    return verify(token, this.accessSecret);
   }
 
   verifyRefreshToken(token: string) {
-    try {
-      return verify(token, this.refreshSecret);
-    } catch (e) {
-      console.log(e);
-    }
+    return verify(token, this.refreshSecret);
   }
 }
 
