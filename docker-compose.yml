@@ -2,6 +2,7 @@ version: "3.5"
 
 services:
   welbex_db:
+    container_name: welbex_db
     image: postgres:alpine
     restart: unless-stopped
     env_file:
@@ -10,8 +11,19 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
     volumes:
       - ./pgdata:/var/lib/postgres/data
     ports:
-      - ${POSTGRES_PORT}:5432
+      - ${POSTGRES_PORT}:5432/tcp
+
+  welbex_backend:
+    container_name: welbex_backend
+    build:
+      context: ./project
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    depends_on:
+      - welbex_db
