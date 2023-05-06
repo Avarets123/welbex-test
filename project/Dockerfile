@@ -1,15 +1,17 @@
-FROM node:latest as build
+FROM node:16-alpine as build
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY package*.json .
+COPY --chown=node:node package.json ./
+COPY --chown=node:node package-lock.json ./
 
-RUN npm i
+RUN npm ci && npm cache clean --force
 
-COPY . .
+COPY --chown=node:node . .
 
-RUN tsc
 
+RUN npx prisma generate
+RUN npx tsc --build
 RUN npx prisma migrate deploy
 
 CMD npm run prod

@@ -15,10 +15,10 @@ export class App {
 
   public async start() {
     try {
-      const PORT = process.env.PORT ?? 3003;
+      const PORT = process.env.BACKEND_PORT ?? 3003;
 
       this.app.listen(PORT, () =>
-        console.log("App has been started successfully")
+        console.log("App has been started successfully in port " + PORT)
       );
     } catch (e) {
       console.log("Error in running application");

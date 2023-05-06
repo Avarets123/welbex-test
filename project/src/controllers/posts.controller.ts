@@ -5,6 +5,10 @@ import { auth } from "../middlewares/auth.middleware";
 import { checkUser } from "../middlewares/checkUser.middleware";
 import { ReqWithUser } from "src/types/reqWithUser.type";
 import { upload } from "../middlewares/upload.middleware";
+import {
+  handlingValidationError,
+  postCreateValidation,
+} from "../middlewares/validator.middleware";
 
 export class PostsController implements IController {
   router: Router = Router();
@@ -16,9 +20,11 @@ export class PostsController implements IController {
       "/posts",
       auth,
       checkUser,
+      postCreateValidation,
       upload.single("file"),
       async (req: ReqWithUser, res: Response, next: NextFunction) => {
         try {
+          handlingValidationError(req, res);
           await this.postsService.create(req, res);
         } catch (e) {
           next(e);

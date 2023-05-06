@@ -1,9 +1,8 @@
-import { NextFunction } from "express";
 import { sign, verify } from "jsonwebtoken";
 
 export class JwtService {
   private readonly accessSecret = process.env.JWT_ACCESS_SECRET ?? "anything";
-  private readonly refreshSecret = process.env.JWT_REFRESH_SECRET ?? "anything";
+  private readonly refreshSecret = process.env.JWT_REFRESH_SECRET ?? "any";
 
   generateTokens(userId: string) {
     const accessToken = sign({ sub: userId }, this.accessSecret, {
