@@ -11,6 +11,8 @@ export const postCreateValidation: ValidationChain[] = [
 ];
 
 export const handlingValidationError = (req: Request, res: Response) => {
+  if (req.file) return;
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
